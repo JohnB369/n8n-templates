@@ -1,0 +1,490 @@
+{
+  "name": "Real Lynx SOCIAL MEDIA FINDER",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e773cdfe-205d-42e5-948c-400a30130809",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1R7FXWKGw1_eyL_G0VzRCCqL6-dmqGTUMUNdNez3ghv4",
+          "mode": "list",
+          "cachedResultName": "50K SCRAPED LEADS IN PHOENIX",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1R7FXWKGw1_eyL_G0VzRCCqL6-dmqGTUMUNdNez3ghv4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1R7FXWKGw1_eyL_G0VzRCCqL6-dmqGTUMUNdNez3ghv4/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "SEARCHED?"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        320,
+        -140
+      ],
+      "id": "212daf6e-120d-4fb2-ad54-95e175fdc478",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CEEXViInrO9jvUfC",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  return {\n    json: {\n      search: `${item.json.first_name} ${item.json.last_name} ${item.json.title} ${item.json.organization_name}`,\n      rowId: item.json.row_number\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -120
+      ],
+      "id": "3c8673f4-9289-4e51-8ba9-18e7d99c0a96",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Group social profiles by rowId and search, combine facebook & instagram URLs\n\nconst grouped = {};\n\n// Loop through all merged items\nfor (const item of items) {\n  const rowId = item.json.rowId;\n  const search = item.json.search || item.json.inputProfileName; // fallback if needed\n  \n  // Initialize group if doesn't exist\n  if (!grouped[rowId]) {\n    grouped[rowId] = {\n      json: {\n        rowId,\n        search,\n        facebook: null,\n        instagram: null,\n      }\n    };\n  }\n  \n  // Assign social URLs if present\n  if (item.json.social === 'facebook' && item.json.socialProfileUrl) {\n    grouped[rowId].json.facebook = item.json.socialProfileUrl;\n  }\n  if (item.json.social === 'instagram' && item.json.socialProfileUrl) {\n    grouped[rowId].json.instagram = item.json.socialProfileUrl;\n  }\n}\n\n// Return array of grouped objects\nreturn Object.values(grouped);\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -160
+      ],
+      "id": "323c2438-a01e-4844-a39e-eb5fca88f482",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1R7FXWKGw1_eyL_G0VzRCCqL6-dmqGTUMUNdNez3ghv4",
+          "mode": "list",
+          "cachedResultName": "50K SCRAPED LEADS IN PHOENIX",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1R7FXWKGw1_eyL_G0VzRCCqL6-dmqGTUMUNdNez3ghv4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1R7FXWKGw1_eyL_G0VzRCCqL6-dmqGTUMUNdNez3ghv4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "1": "={{ $json.rowId }}",
+            "SEARCHED?": "yes",
+            "FACEBOOK URL": "={{ $json.facebook }}",
+            "INSTAGRAM URL": "={{ $json.instagram }}",
+            "PHONE NUMBER": "="
+          },
+          "matchingColumns": [
+            "1"
+          ],
+          "schema": [
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_name",
+              "displayName": "last_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "organization_name",
+              "displayName": "organization_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PHONE NUMBER",
+              "displayName": "PHONE NUMBER",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "organization_website_url",
+              "displayName": "organization_website_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "organization_raw_address",
+              "displayName": "organization_raw_address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "SEARCHED?",
+              "displayName": "SEARCHED?",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "FACEBOOK URL",
+              "displayName": "FACEBOOK URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "INSTAGRAM URL",
+              "displayName": "INSTAGRAM URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "BATCH ID",
+              "displayName": "BATCH ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "1",
+              "displayName": "1",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1800,
+        -140
+      ],
+      "id": "825eecfd-6d52-416b-ab04-7c6acc7f0d2f",
+      "name": "Google Sheets3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CEEXViInrO9jvUfC",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 110,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        540,
+        -140
+      ],
+      "id": "8c48dc49-58ce-4040-aacd-32a4acc65a60",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me1",
+      "typeVersion": 1,
+      "position": [
+        1780,
+        -500
+      ],
+      "id": "7f5165d4-206f-4c5c-9373-34bea44003cc"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "search",
+              "field2": "inputProfileName"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1160,
+        -280
+      ],
+      "id": "d129f93d-328f-45bc-9cd0-7018faa3a971",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/tri_angle~social-media-finder/run-sync-get-dataset-items?token=apify_api_83sYrfbjsBK7a8GbjLfpWgNJTQ41Sb3O3ctg",
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n    \"profileNames\": [\n        \"{{ $json.search }}\"\n    ],\n    \"socials\": [\n        \"facebook\",\n        \"instagram\"\n    ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        -120
+      ],
+      "id": "b7565886-8dd8-4b60-8856-aa0f6176994b",
+      "name": "HTTP Request2",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1580,
+        -160
+      ],
+      "id": "0ed9b530-3057-4b1a-9c17-4c7f48045c56",
+      "name": "Wait1",
+      "webhookId": "9855e8e2-251f-4062-9e2b-1a4b43d6e81b"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets3": {
+      "main": [
+        [
+          {
+            "node": "Replace Me1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "87f616b7-0a13-408f-b3a0-48767b769db3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9b97f48e0b262301cc21f17eb648a1e32367715d5c395d40328f6e1024784beb"
+  },
+  "id": "etoyYCrdp9Tou5nn",
+  "tags": []
+}
